@@ -1,0 +1,5 @@
+configparser
+boto3
+pytz
+#requests
+#pandas
