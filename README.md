@@ -3,6 +3,7 @@ Codes used for learning materials on O Reilly's "Data Pipeline Pocket Reference"
 
 ### Getting Started
 Create .env file in parent folder of this repository for sensitive environment variables such as passwords.
+In addition, user need to configure credentials to login to AWS run locally. (login profile and role used to connect to AWS is defined in docker-compose.override.yml)
 
 #### Example of .env content:
 env=dev
@@ -20,4 +21,4 @@ snowflake_password=xyz
 
 ### Reference for docker-compose.yml used
 Added docker-compose.yml and docker-compose.override.ymml to get IAM Role permission from AWS when running container locally.
-Please visit https://aws.amazon.com/blogs/compute/a-guide-to-locally-testing-containers-with-amazon-ecs-local-endpoints-and-docker-compose/ for more details
+Please visit https://aws.amazon.com/blogs/compute/a-guide-to-locally-testing-containers-with-amazon-ecs-local-endpoints-and-docker-compose/ for more details.
