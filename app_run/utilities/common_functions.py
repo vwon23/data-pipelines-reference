@@ -8,13 +8,14 @@ import pytz
 from pytz import timezone
 
 
-def init(path_app_run):
+def init(path_app_run: str):
     '''
     creates global variable class to handle the variables across scripts and functions. Sets the provided application run path as dnam in gvar
 
     Parameters
     ---------------
-    None
+        path_app_run: str
+            directory path of app_run (e.g. app/app_run) returned from os.path.dir() function
     '''
     ## create a class to hold global variables ##
     class global_variables:
@@ -27,6 +28,13 @@ def init(path_app_run):
 
 
 def get_config():
+    '''
+    Adds variables to global variable gvar based on values derived from environment variables and config.cfg file
+
+    Parameters
+    ---------------
+    None
+    '''
     config = configparser.ConfigParser()
     config.read(os.path.join(gvar.dname, 'config', 'config.cfg'))
 
@@ -50,14 +58,21 @@ def get_config():
     #print(f'AWS s3 bucket name: {gvar.aws_s3_bucket_name}')
 
 
-def set_logger(loggername, filename):
+def set_logger(loggername: str, filename: str):
     '''
-    Sets logger based on selected loggername in logging.cfg. Outputs to provided filename
+    Sets logger based on selected loggername & Outputs to provided filename
 
     Parameters
     ---------------
-    loggername, filename
+        loggername: str
+            The name of logger to set as. (The log name will be searched in logging.cfg to check config setting)
+        filename: str
+            the name of filename to store logfile as
+    Return
+    ---------------
+        logger: logging.getLogger(loggername)
     '''
+    
     if not os.path.exists(gvar.path_log):
         os.makedirs(gvar.path_log)
 
@@ -72,6 +87,13 @@ def set_logger(loggername, filename):
 
 
 def get_current_datetime():
+    '''
+    Sets variables for current date/time values.
+
+    Parameters
+    ---------------
+    None
+    '''
     ## UTC Time variables ##
     gvar.current_utc = dt.datetime.now()
     gvar.current_datetime_utc = gvar.current_utc.strftime("%Y-%m-%d %H:%M:%S")
