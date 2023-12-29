@@ -9,8 +9,9 @@ sys.path.append(path_app_run)
 
 ## use common functions to initalize global variable ##
 import utilities.common_functions as cf
-cf.init(path_app_run)
+import queries.queries as queries
 
+cf.init(path_app_run)
 cf.get_config()
 cf.get_current_datetime()
 
@@ -18,19 +19,19 @@ loggername = 'extract_mysql'
 logfile_name = f'{loggername}_{cf.gvar.current_date_pst}.log'
 logger = cf.set_logger(loggername, logfile_name)
 
-extract_file_name = "order_extract.csv"
-extract_file_path = os.path.join(cf.gvar.path_data, extract_file_name)
+extract_data_file_name = f'order_extract_{cf.gvar.current_date_pst}.csv'
+extract_data_file_path = os.path.join(cf.gvar.path_data, extract_data_file_name)
 
 
 ## Connect to source and extract data
-m_query = "SELECT * FROM Orders;"
+m_query = queries.m_query
 
 source_connection = cf.connect_mysql()
 m_cursor = source_connection.cursor()
 m_cursor.execute(m_query)
 results = m_cursor.fetchall()
 
-with open(extract_file_path, 'w') as fp:
+with open(extract_data_file_path, 'w') as fp:
     csv_w = csv.writer(fp, delimiter='|')
     csv_w.writerows(results)
 
@@ -40,4 +41,4 @@ source_connection.close()
 
 ## Upload file to AWS S3 bucket
 bucket_name = cf.gvar.aws_s3_bucket_name
-cf.s3_upload_file(extract_file_path, bucket_name, extract_file_name)
+cf.s3_upload_file(extract_data_file_path, bucket_name, extract_data_file_name)
