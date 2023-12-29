@@ -7,6 +7,9 @@ Create .env file in parent folder of this repository for sensitive environment v
 #### Example of .env content:
 env=dev
 aws_rgn=us-west-2
+mysql_username=admin
+mysql_password=xyz
+snowflake_username=admin
 snowflake_password=xyz
 
 ## Run docker container locally
@@ -15,6 +18,6 @@ snowflake_password=xyz
 3. Run command "docker exec -it {name_of_container} bash to test scripts inside container
 4. Run command "docker-compose down" when done testing to remove docker containers
 
-### Reference for Docker-Compose
+### Reference for docker-compose.yml used
 Added docker-compose.yml and docker-compose.override.ymml to get IAM Role permission from AWS when running container locally.
 Please visit https://aws.amazon.com/blogs/compute/a-guide-to-locally-testing-containers-with-amazon-ecs-local-endpoints-and-docker-compose/ for more details
