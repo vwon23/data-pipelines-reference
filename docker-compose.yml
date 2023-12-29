@@ -1,7 +1,7 @@
 version: "2"
 services:
   app:
-    container_name: data-pipelines-container
+    container_name: data-pipeline-container
     build:
       # Build an image from the Dockerfile in the current directory
       context: .
