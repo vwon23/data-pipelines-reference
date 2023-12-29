@@ -8,6 +8,7 @@ import pytz
 from pytz import timezone
 
 import pymysql
+import boto3
 
 
 def init(path_app_run):
@@ -42,12 +43,18 @@ def get_config():
 
     gvar.env = os.environ['env']
 
+    ## path variables ##
     gvar.path_app = os.path.dirname(gvar.dname)
     #gvar.path_app = config.get('Paths', 'HOME_DIR')
-
     gvar.path_log = os.path.join(gvar.path_app, 'logs')
     gvar.path_logconfig = os.path.join(gvar.dname, 'config', 'logging.cfg')
-    #gvar.path_log = config.get('Paths', 'LOG_DIR')
+    gvar.path_data = os.path.join(gvar.path_app, 'data')
+
+    ## create directories during run time
+    if not os.path.exists(gvar.path_log):
+        os.makedirs(gvar.path_log)
+    if not os.path.exists(gvar.path_data):
+        os.makedirs(gvar.path_data)
 
     ## mysql variables ##
     gvar.mysql_hostname = config.get('mysql_info', 'hostname')
@@ -58,8 +65,8 @@ def get_config():
 
     ## AWS variables ##
     gvar.aws_rgn = os.environ['aws_rgn']
-    gvar.aws_s3_bucket_name = config.get('aws_info', 's3_bucket_name').format(env = gvar.env, aws_rgn = gvar.aws_rgn)
-    #print(f'AWS s3 bucket name: {gvar.aws_s3_bucket_name}')
+    gvar.aws_s3_bucket = config.get('aws_info', 's3_bucket').format(env = gvar.env, aws_rgn = gvar.aws_rgn)
+    gvar.aws_s3_bucket_name = gvar.aws_s3_bucket.split('//')[1]
 
 
 def set_logger(loggername, filename):
@@ -79,8 +86,8 @@ def set_logger(loggername, filename):
         logger derived from logging.getLogger(loggername)
     '''
     
-    if not os.path.exists(gvar.path_log):
-        os.makedirs(gvar.path_log)
+    # if not os.path.exists(gvar.path_log):
+    #     os.makedirs(gvar.path_log)
 
     gvar.path_logfile = os.path.join(gvar.path_log, filename)
     logging.config.fileConfig(gvar.path_logconfig, defaults={'logfilename': gvar.path_logfile})
@@ -126,6 +133,7 @@ def connect_mysql():
     conn
         connection returned using function pymysql.connect
     '''
+
     conn = pymysql.connect(host=gvar.mysql_hostname,
                            user=gvar.mysql_username,
                            password=gvar.mysql_password,
@@ -137,3 +145,50 @@ def connect_mysql():
         logger.info("MySQL connection established!")
     
     return conn
+
+
+def s3_upload_file(file_path, bucket_name, key):
+    '''
+    uploads file to aws s3 bucket
+
+    Parameters
+    ---------------
+    file_path: str
+        The path of file to upload
+    bucket_name: str
+        The name of aws s3 bucket
+    key: str
+        The key value to upload file as
+    '''
+
+    s3c = boto3.client('s3')
+    try:
+        s3c.upload_file(file_path, bucket_name, key)
+    except:
+        logger.error(f'Error occured while uploading {file_path} to aws s3 bucket {bucket_name}')
+    else:
+        logger.info(f'Successfully uploaded {file_path} to aws s3 bucket {bucket_name}')
+    
+
+def s3_clean_bucket(bucket_name, prefix, n=365):
+    '''
+    Deletes objects older than n days inside s3 bucket. Filters objects based on prefix
+
+    Parameters
+    ---------------
+    bucket_name: str
+        The name of aws s3 bucket
+    prefix: str
+        String prefix to filter objects
+    n: int
+        The number of days older than current date to remove objects
+    '''
+
+    s3r = boto3.resource('s3')
+    s3_bucket = s3r.Bucket(bucket_name)
+
+    logger.info(f'Removing objects older than {n} days inside s3 bucket {bucket_name} with prefix {prefix}')
+    for obj in s3_bucket.objects.filter(Prefix=prefix):
+        if obj.last_modified < gvar.current_pst - dt.timedelta(days=n):
+            logger.info(f'{obj.key} is older than {n} days and is deleted')
+            obj.delete()
