@@ -45,4 +45,8 @@ services:
           AWS_CONTAINER_CREDENTIALS_RELATIVE_URI: "/role/python_app"
           env: ${env}
           aws_rgn: ${aws_rgn}
+          mysql_username: ${mysql_username}
+          mysql_password: ${mysql_password}
+          snowflake_username: ${snowflake_username}
+          snowflake_password: ${snowflake_password}
           #AWS_CONTAINER_CREDENTIALS_RELATIVE_URI: "/creds"

@@ -1,5 +1,6 @@
 import os, sys
 import csv
+import boto3
 
 ## Find path of the script then find the path of parent folder and add it to system path ##
 path_script = os.path.abspath(__file__)
@@ -35,3 +36,9 @@ fp.close()
 m_cursor.close()
 source_connection.close()
 
+## Upload file to AWS S3 bucket
+s3 = boto3.client('s3')
+bucket_name = cf.gvar.aws_s3_bucket_name
+
+s3_file_name = local_filename
+s3.upload_file(local_filename, bucket_name, s3_file_name)
