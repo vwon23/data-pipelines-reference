@@ -7,15 +7,17 @@ import datetime as dt
 import pytz
 from pytz import timezone
 
+import pymysql
 
-def init(path_app_run: str):
+
+def init(path_app_run):
     '''
     creates global variable class to handle the variables across scripts and functions. Sets the provided application run path as dnam in gvar
 
     Parameters
     ---------------
-        path_app_run: str
-            directory path of app_run (e.g. app/app_run) returned from os.path.dir() function
+    path_app_run: str
+        Directory path of app_run (e.g. app/app_run) returned from os.path.dir() function
     '''
     ## create a class to hold global variables ##
     class global_variables:
@@ -50,6 +52,8 @@ def get_config():
     ## mysql variables ##
     gvar.mysql_hostname = config.get('mysql_info', 'hostname')
     gvar.mysql_port = config.get('mysql_info', 'port')
+    gvar.mysql_username = os.environ['mysql_username']
+    gvar.mysql_password = os.environ['mysql_password']
     gvar.mysql_database = config.get('mysql_info', 'database')
 
     ## AWS variables ##
@@ -58,19 +62,21 @@ def get_config():
     #print(f'AWS s3 bucket name: {gvar.aws_s3_bucket_name}')
 
 
-def set_logger(loggername: str, filename: str):
+def set_logger(loggername, filename):
     '''
     Sets logger based on selected loggername & Outputs to provided filename
 
     Parameters
     ---------------
-        loggername: str
-            The name of logger to set as. (The log name will be searched in logging.cfg to check config setting)
-        filename: str
-            the name of filename to store logfile as
-    Return
+    loggername: str
+        The name of logger to set as. (The log name will be searched in logging.cfg to check config setting)
+    filename: str
+        the name of filename to store logfile as
+
+    Returns
     ---------------
-        logger: logging.getLogger(loggername)
+    logger
+        logger derived from logging.getLogger(loggername)
     '''
     
     if not os.path.exists(gvar.path_log):
@@ -105,3 +111,29 @@ def get_current_datetime():
     gvar.current_datetime_pst = gvar.current_pst.strftime("%Y-%m-%d %H:%M:%S")
 
     print(f'Current Time in PST: {gvar.current_datetime_pst}')
+
+
+def connect_mysql():
+    '''
+    Creates connection to mysql and returns c
+
+    Parameters
+    ---------------
+    None
+
+    Returns
+    ---------------
+    conn
+        connection returned using function pymysql.connect
+    '''
+    conn = pymysql.connect(host=gvar.mysql_hostname,
+                           user=gvar.mysql_username,
+                           password=gvar.mysql_password,
+                           db=gvar.mysql_database,
+                           port=int(gvar.mysql_port))
+    if conn is None:
+        logger.error("Error connecting to the MySQL database")
+    else:
+        logger.info("MySQL connection established!")
+    
+    return conn
