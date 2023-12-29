@@ -1,5 +1,6 @@
 configparser
 boto3
+PyMySQL
 pytz
 #requests
 #pandas
