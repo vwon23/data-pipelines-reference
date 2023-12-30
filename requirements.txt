@@ -3,5 +3,6 @@ boto3
 PyMySQL
 snowflake-connector-python
 pytz
+mysql-replication
 #requests
 #pandas
