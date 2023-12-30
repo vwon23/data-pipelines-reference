@@ -24,7 +24,7 @@ extract_data_file_path = os.path.join(cf.gvar.path_data, extract_data_file_name)
 
 
 ## Connect to source and extract data
-m_query = queries.m_query
+m_query = queries.select_orders_full_query
 
 source_connection = cf.connect_mysql()
 m_cursor = source_connection.cursor()
