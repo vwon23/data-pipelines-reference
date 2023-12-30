@@ -19,39 +19,40 @@ loggername = 'extract_mysql'
 logfile_name = f'{loggername}_{cf.gvar.current_date_pst}.log'
 logger = cf.set_logger(loggername, logfile_name)
 
-extract_data_file_name = f'order_extract_{cf.gvar.current_date_pst}.csv'
-extract_data_file_path = os.path.join(cf.gvar.path_data, extract_data_file_name)
-
-
 ## Connect to target and extract max last updated
-query = queries.get_max_update_orders
+max_update_query = queries.get_max_update_orders
 target_connection = cf.connect_snowflake()
 target_cursor = target_connection.cursor()
-target_cursor.execute(query)
+target_cursor.execute(max_update_query)
+logger.info('Executed query: {}'.format(target_cursor.query))
 result = target_cursor.fetchone()
-last_updated_warehouse = result[0]
-logger.info(f'last updated warehouse selected as: {last_updated_warehouse}')
+last_updated_target = result[0]
+logger.info(f'last updated from target selected as: {last_updated_target}')
 
 target_cursor.close()
 target_connection.close()
 
-
 ## Connect to source and extract data
-m_query = queries.m_query
+extract_orders_query = queries.extract_orders_query
 source_connection = cf.connect_mysql()
-m_cursor = source_connection.cursor()
-m_cursor.execute(m_query)
-results = m_cursor.fetchall()
+source_cursor = source_connection.cursor()
+source_cursor.execute(extract_orders_query, {'max_update_orders' : last_updated_target})
+logger.info('Executed query: {}'.format(source_cursor._executed))
+# logger.info('Executed query: {}'.format(source_cursor._query.decode('utf-8')))
+results = source_cursor.fetchall()
 
-with open(extract_data_file_path, 'w') as fp:
-    csv_w = csv.writer(fp, delimiter='|')
+extract_file_name = f'order_extract_{cf.gvar.current_date_pst}.csv'
+extract_file_path = os.path.join(cf.gvar.path_data, extract_file_name)
+
+with open(extract_file_path, 'w') as extract_file:
+    csv_w = csv.writer(extract_file, delimiter='|')
     csv_w.writerows(results)
-logger.info('extracted data from source and written to {extract_data_file_path}')
+logger.info(f'extracted data from source and written to {extract_file_path}')
 
-fp.close()
-m_cursor.close()
+extract_file.close()
+source_cursor.close()
 source_connection.close()
 
 ## Upload file to AWS S3 bucket
 bucket_name = cf.gvar.aws_s3_bucket_name
-cf.s3_upload_file(extract_data_file_path, bucket_name, extract_data_file_name)
+cf.s3_upload_file(extract_file_path, bucket_name, extract_file_name)
