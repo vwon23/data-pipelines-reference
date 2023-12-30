@@ -34,6 +34,7 @@ results = m_cursor.fetchall()
 with open(extract_data_file_path, 'w') as fp:
     csv_w = csv.writer(fp, delimiter='|')
     csv_w.writerows(results)
+logger.info('extracted data from source and written to {extract_data_file_path}')
 
 fp.close()
 m_cursor.close()

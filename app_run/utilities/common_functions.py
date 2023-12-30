@@ -92,11 +92,12 @@ def set_logger(loggername, filename):
     gvar.path_logfile = os.path.join(gvar.path_log, filename)
     logging.config.fileConfig(gvar.path_logconfig, defaults={'logfilename': gvar.path_logfile})
 
+    gvar.logger = logging.getLogger(loggername)
     global logger
-    logger = logging.getLogger(loggername)
+    logger = logging.getLogger(__name__)
     logger.info(f'logs being written to {gvar.path_logfile}')
 
-    return logger
+    return gvar.logger
 
 
 def get_current_datetime():
