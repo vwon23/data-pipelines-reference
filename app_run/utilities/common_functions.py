@@ -9,6 +9,7 @@ from pytz import timezone
 
 import pymysql
 import boto3
+import snowflake.connector
 
 
 def init(path_app_run):
@@ -68,6 +69,15 @@ def get_config():
     gvar.aws_s3_bucket = config.get('aws_info', 's3_bucket').format(env = gvar.env, aws_rgn = gvar.aws_rgn)
     gvar.aws_s3_bucket_name = gvar.aws_s3_bucket.split('//')[1]
 
+    ## Snowflake variables ##
+    gvar.snowflake_account = config.get('snowflake_info', 'account')
+    gvar.snowflake_username = os.environ['snowflake_username']
+    gvar.snowflake_password = os.environ['snowflake_password']
+    gvar.snowflake_role = config.get('snowflake_info', 'role')
+    gvar.snowflake_wh = config.get('snowflake_info', 'warehouse')
+    gvar.snowflake_database = config.get('snowflake_info', 'database')
+    
+
 
 def set_logger(loggername, filename):
     '''
@@ -123,7 +133,7 @@ def get_current_datetime():
 
 def connect_mysql():
     '''
-    Creates connection to mysql and returns c
+    Creates connection to mysql and returns connection
 
     Parameters
     ---------------
@@ -141,10 +151,36 @@ def connect_mysql():
                            db=gvar.mysql_database,
                            port=int(gvar.mysql_port))
     if conn is None:
-        logger.error("Error connecting to the MySQL database")
+        logger.error(f'Error connecting to the MySQL database {gvar.mysql_hostname}')
     else:
-        logger.info("MySQL connection established!")
-    
+        logger.info(f'MySQL connection established to {gvar.mysql_hostname}')
+    return conn
+
+
+def connect_snowflake():
+    '''
+    Creates connection to snowflake and returns connection
+
+    Parameters
+    ---------------
+    None
+
+    Returns
+    ---------------
+    conn
+        connection returned using function snowflake.connector.connect
+    '''
+
+    conn = snowflake.connector.connect(account=gvar.snowflake_account,
+                           user=gvar.snowflake_username,
+                           password=gvar.snowflake_password,
+                           warehouse=gvar.snowflake_wh,
+                           role=gvar.snowflake_role,
+                           database=gvar.snowflake_database)
+    if conn is None:
+        logger.error(f'Error connecting to the Snowflake database {gvar.mysql_hostname}')
+    else:
+        logger.info(f'Snowflake connection established to {gvar.mysql_hostname}')
     return conn
 
 

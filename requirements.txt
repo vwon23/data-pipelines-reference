@@ -1,6 +1,7 @@
 configparser
 boto3
 PyMySQL
+snowflake-connector-python
 pytz
 #requests
 #pandas
