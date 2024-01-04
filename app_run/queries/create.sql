@@ -9,3 +9,10 @@ CREATE TABLE data_lake.my_app.Orders (
  OrderStatus varchar(30),
  LastUpdated timestamp
 );
+
+CREATE TABLE data_lake.my_app.metadata_load (
+ Load_Datetime timestamp,
+ BinLog_Max_Pos int,
+ Orders_Max_LastUpdated timestamp,
+ PRIMARY KEY (Load_Datetime)
+);
