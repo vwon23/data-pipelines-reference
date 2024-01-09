@@ -40,6 +40,6 @@ fp.close()
 m_cursor.close()
 source_connection.close()
 
-## Upload file to AWS S3 bucket
-bucket_name = cf.gvar.aws_s3_bucket_name
-cf.s3_upload_file(extract_data_file_path, bucket_name, extract_data_file_name)
+# ## Upload file to AWS S3 bucket
+# bucket_name = cf.gvar.aws_s3_bucket_name
+# cf.s3_upload_file(extract_data_file_path, bucket_name, extract_data_file_name)

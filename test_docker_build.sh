@@ -1,4 +1,4 @@
-#docker-compose down
+## Script used for building docker images and running container
 docker stop data-pipeline-container
 docker rm data-pipeline-container
 
