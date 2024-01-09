@@ -18,7 +18,7 @@ def init(path_app_run):
 
     Parameters
     ---------------
-    path_app_run: str
+    path_app_run: path
         Directory path of app_run (e.g. app/app_run) returned from os.path.dir() function
     '''
     ## create a class to hold global variables ##
@@ -78,7 +78,6 @@ def get_config():
     gvar.snowflake_database = config.get('snowflake_info', 'database')
     
 
-
 def set_logger(loggername, filename):
     '''
     Sets logger based on selected loggername & Outputs to provided filename
@@ -88,7 +87,7 @@ def set_logger(loggername, filename):
     loggername: str
         The name of logger to set as. (The log name will be searched in logging.cfg to check config setting)
     filename: str
-        the name of filename to store logfile as
+        the name to store logfile as
 
     Returns
     ---------------
@@ -204,7 +203,7 @@ def s3_upload_file(file_path, bucket_name, key):
     except:
         logger.error(f'Error occured while uploading {file_path} to aws s3 bucket {bucket_name}')
     else:
-        logger.info(f'Successfully uploaded {file_path} to aws s3 bucket {bucket_name}')
+        logger.info(f'Successfully uploaded {file_path} to aws s3 bucket {bucket_name} as {key}')
     
 
 def s3_clean_bucket(bucket_name, prefix, n=365):
